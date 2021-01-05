@@ -1,17 +1,25 @@
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using dotnet_rpg.models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 
 namespace dotnet_rpg.Data
 {
     public class AuthRepository : IAuthRepository
     {
-
+        private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
         private readonly DataContext _context;
-        public AuthRepository(DataContext DataContext, IMapper mapper = null)
+        public AuthRepository(DataContext DataContext, IConfiguration configuration, IMapper mapper = null)
         {
+            _configuration = configuration;
             _context = DataContext;
             _mapper = mapper;
         }
@@ -22,14 +30,19 @@ namespace dotnet_rpg.Data
         {
             ServiceResponse<string> response = new ServiceResponse<string>();
             User user = await _context.Users.FirstOrDefaultAsync(u => u.Username.ToLower().Equals(username.ToLower()));
-            if(user == null) {
+            if (user == null)
+            {
                 response.Success = false;
                 response.Message = "user or password is incorrect";
-            } else if(!VerfiyPasswordHash(password  , user.PasswordHash , user.PasswordSalt)){
+            }
+            else if (!VerfiyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
+            {
                 response.Success = false;
                 response.Message = "user or password is incorrect";
-            } else {
-                response.Data = user.Id.ToString();
+            }
+            else
+            {
+                response.Data = CreateToken(user);
             }
             return response;
 
@@ -72,19 +85,48 @@ namespace dotnet_rpg.Data
 
         }
 
-        private bool VerfiyPasswordHash(string password , byte[] passwordHash , byte[] passwordSalt)
+        private bool VerfiyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
         {
-            using(var hmac = new System.Security.Cryptography.HMACSHA512(passwordSalt))
+            using (var hmac = new System.Security.Cryptography.HMACSHA512(passwordSalt))
             {
                 var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-                for (int i = 0; i < computedHash.Length ; i++)
+                for (int i = 0; i < computedHash.Length; i++)
                 {
-                    if(computedHash[i] != passwordHash[i]) {
+                    if (computedHash[i] != passwordHash[i])
+                    {
                         return false;
                     }
                 }
-                    return true;
+                return true;
             }
+        }
+
+        private string CreateToken(User user)
+        {
+            List<Claim> claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier , user.Id.ToString()),
+                new Claim(ClaimTypes.Name , user.Username)
+            };
+            SymmetricSecurityKey key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value)
+            );
+
+            SigningCredentials creds = new SigningCredentials(key , SecurityAlgorithms.HmacSha512Signature);
+
+            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.Now.AddDays(1),
+                SigningCredentials = creds
+                
+            };
+
+            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
+
+
+            return tokenHandler.WriteToken(token);
         }
     }
 }
