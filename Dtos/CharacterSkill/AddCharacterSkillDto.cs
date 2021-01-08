@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace dotnet_rpg.Dtos.CharacterSkill
 {
-    public class CharacterSkillDto
+    public class AddCharacterSkillDto
     {
         public int CharacterId { get; set; }
         public int SkillId { get; set; }
