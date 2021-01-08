@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace dotnet_rpg.models
 {
     public class Character
@@ -11,5 +13,6 @@ namespace dotnet_rpg.models
         public User User { get; set; }
         public RpgClass Class { get; set; } = RpgClass.Knight;
         public Weapon Weapon { get; set; }
+        public List<CharacterSkill> CharacterSkills { get; set; }
     }
 }
