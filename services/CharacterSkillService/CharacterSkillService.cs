@@ -59,11 +59,13 @@ namespace dotnet_rpg.services.CharacterSkillService
                 await _context.CharacterSkills.AddAsync(characterSkill);
                 await _context.SaveChangesAsync();
                 response.Data = _mapper.Map<GetCharacterDto>(character);
+                return response;
             }
             catch (Exception ex)
             {
                 response.Success = false;
                 response.Message = ex.Message;
+                return response;
             }
         }
     }

@@ -12,9 +12,9 @@ namespace dotnet_rpg.Controllers
     [Route("[Controller]")]
     public class CharacterSkillController : ControllerBase
     {
-        private readonly CharacterSkillService _characterSkillService;
+        private readonly ICharacterSkillService _characterSkillService;
 
-        public CharacterSkillController(CharacterSkillService characterSkillService)
+        public CharacterSkillController(ICharacterSkillService characterSkillService)
         {
             _characterSkillService = characterSkillService;
         }
