@@ -54,7 +54,7 @@ namespace dotnet_rpg.Data
             if (await UserExsits(user.Username))
             {
                 response.Success = false;
-                response.Message = "somthing went wrong"; // "Username already taken";
+                response.Message = "something went wrong"; // "Username already taken";
                 return response;
             }
 
@@ -106,7 +106,8 @@ namespace dotnet_rpg.Data
             List<Claim> claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier , user.Id.ToString()),
-                new Claim(ClaimTypes.Name , user.Username)
+                new Claim(ClaimTypes.Name , user.Username),
+                new Claim(ClaimTypes.Role , user.Role )
             };
             SymmetricSecurityKey key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value)
