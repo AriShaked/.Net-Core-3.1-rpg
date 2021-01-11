@@ -55,7 +55,8 @@ namespace dotnet_rpg
                         ValidateAudience = false
                     };
                 });
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>(); 
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSwaggerGen();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -65,6 +66,12 @@ namespace dotnet_rpg
             {
                 app.UseDeveloperExceptionPage();
             }
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "rpg");
+                c.RoutePrefix = string.Empty;
+            });
 
             // app.UseHttpsRedirection();
 
