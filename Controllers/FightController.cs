@@ -1,7 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System.Security.Authentication;
+using System.Threading;
+using System.Threading.Tasks;
 using dotnet_rpg.Dtos.Fight;
 using dotnet_rpg.services.FightService;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.IIS;
 
 namespace dotnet_rpg.Controllers
 {
@@ -37,6 +40,11 @@ namespace dotnet_rpg.Controllers
         [HttpGet("GetHighScore")]
         public async Task<IActionResult> GetHighScore()
         {
+            var isis = true;
+            if (isis)
+            {
+                throw new AuthenticationException();
+            }
             return Ok(await _fightService.GetHighScore() );
         }
 
